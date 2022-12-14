@@ -1,15 +1,9 @@
 'use strict';
 
-let eventpool = require('../eventpool');
-
-module.exports = (payload) => {
-  setTimeout(() => {
-    console.log(`DRIVER: picked up ${payload.orderID}`),
-    eventpool.emit('IN-TRANSIT', payload);
-  }, 2000);
+module.exports = (socket) => (payload) => {
 
   setTimeout(() => {
-    console.log(`DRIVER: delivered ${payload.orderID}`),
-    eventpool.emit('DELIVERED', payload)
-  }, 8000)
-}
+    console.log(`Picking up ${payload.orderID}`, payload);
+    socket.emit('IN-TRANSIT', payload);
+  }, 3000);
+};

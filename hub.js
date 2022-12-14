@@ -1,46 +1,35 @@
 'use strict';
 
-const eventPool = require('./eventpool');
-const Chance = require('chance');
+const { Server } = require('socket.io');
+const PORT = process.env.PORT || 3002;
 
-const chance = new Chance();
+const server = new Server(PORT);
 
-const { newOrder, deliveredConfirmation } = require('./vendor/vendorHandler');
-const driverHandler = require('./driver/driverHandler');
+const caps = server.of('/caps');
 
-eventPool.on('NEW_ORDER', newOrder)
-eventPool.on('PICKUP', driverHandler);
-eventPool.on('DELIVERED', deliveredConfirmation);
-eventPool.on('IN_TRANSIT', inTransit);
-eventPool.on('DELIVERED', delivered);
-eventPool.on('PICKUP', pickUp);
+caps.on('connection', (socket) => {
+  console.log('Socket connected to Event Server!', socket.id);
+  console.log('Socket connected to caps namespace!', socket.id);
 
-function pickUp(payload){
-    setTimeout(() => {
-        const date = chance.date();
-        const time = date.toDateString();
-        console.log('Event: Pickup', `Time: ${time}`, payload)
-    }, 2000);
-  }
-  
-  function inTransit(payload){
-    setTimeout(() => {
-        const date = chance.date();
-        const time = date.toDateString();
-        console.log('Event: In Transit', `Time: ${time}`, payload)
-    }, 2000);
-  }
-  
-  function delivered(payload){
-    setTimeout(() => {
-        const date = chance.date();
-        const time = date.toDateString();
-        console.log('Event: Delivered', `Time: ${time}`, payload)
-    }, 2000);
-  }
+  socket.on('JOIN', (room) => {
+    console.log(`You have entered the ${room} room`);
+    socket.join(room);
+    socket.onAny((event, payload) => {
+      const date = new Date();
+      const time = date.toTimeString();
+      console.log('EVENT', {event, time, payload});
+    });
+  });
 
-setInterval(() => {
-    console.log('---------New Order Inbound ---------');
-    let payload = {text: 'New Order Arriving'};
-    eventPool.emit('NEW_ORDER', payload)
-}, 5000)
+  socket.on('PICKUP', (payload) => {
+    caps.emit('PICKUP', payload);
+  });
+
+  socket.on('IN-TRANSIT', (payload) => {
+    caps.emit('IN-TRANSIT', payload);
+  });
+
+  socket.on('DELIVERED', (payload) => {
+    caps.emit('DELIVERED', payload);
+  });
+});
