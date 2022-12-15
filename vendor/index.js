@@ -2,29 +2,52 @@
 
 const { io } = require('socket.io-client');
 const Chance = require('chance');
-
-const vendorHandler = require('./vendorHandler');
-const vendorDelivered = require('./delivered');
+const MessageClient = require('../lib/messageClient')
 
 const socket = io('http://localhost:3002/caps');
-
 const chance = new Chance();
 
-socket.on('PICKUP', vendorHandler);
-socket.on('DELIVERED', vendorDelivered);
+const acme = new MessageClient('Acme Widgets');
+const flowers = new MessageClient('1-800-Flowers');
 
-socket.on('connect', () => {
-  setInterval(() => {
-    let payload = {
-      store: chance.company(),
-      orderID: chance.guid(),
-      customer: chance.name(),
-      address: `${chance.city()}, ${chance.state()}`,
-    };
+acme.subscribe('IN-TRANSIT', (payload) => {
+  console.log(`Confirming pickup of order: ${payload.orderId}, en route`);
+})
 
-    socket.emit('JOIN', `${payload.store}`);
-
-    console.log('-------transmitting new package---------', payload);
-    socket.emit('PICKUP', payload);
-  }, 5000);
+acme.subscribe('DELIVERED', payload => {
+  console.log('Thank you for delivering package: ', payload.orderId);
+  acme.publish('RECEIVED', payload);
 });
+
+setInterval(() => {
+  const payload = {
+    store: 'Acme Widgets',
+    orderId: chance.guid(),
+    name: chance.name(),
+    address: chance.address(),
+  }
+
+  console.log('-----new package ready-----', payload);
+  acme.publish('PICKUP', payload);
+}, 7000);
+
+acme.subscribe('IN-TRANSIT', (payload) => {
+  console.log(`Confirming pickup of order ${payload.orderId}, en route`);
+})
+
+flowers.subscribe('DELIVERED', payload => {
+  console.log('Thank you for delivering package: ', payload.orderId);
+  flowers.publish('RECEIVED', payload);
+})
+
+setInterval(() => {
+  const payload = {
+    store: '1-800-Flowers',
+    orderId: chance.guid(),
+    name: chance.name(),
+    address:chance.address(),
+  }
+
+  console.log('-----new package ready-----', payload);
+  flowers.publish('PICKUP', payload);
+}, 7000);

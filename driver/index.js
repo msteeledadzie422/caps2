@@ -1,20 +1,19 @@
 'use strict';
 
 const { io } = require('socket.io-client');
-
-const createTransit = require('./driverHandler');
-const createDelivered = require('./delivered');
-
 const socket = io('http://localhost:3002/caps');
 
+const MessageClient = require('../lib/messageClient');
+const driver = new MessageClient('driver');
 
-const transitOrder = createTransit(socket);
-const deliveredOrder = createDelivered(socket);
+driver.publish('GET_ALL',  { queueId: 'orderId'});
 
-socket.emit('JOIN', 'Caps');
-
-socket.on('PICKUP', transitOrder);
-socket.on('IN-TRANSIT', deliveredOrder);
+driver.subscribe('PICKUP', payload => {
+  console.log('Order picked up', payload.orderId);
+  driver.publish('IN-TRANSIT', payload)
+  console.log('Order delivered', payload.orderId);
+  driver.publish('DELIVERED', payload);
+});
 
 socket.on('connect', () => {
   console.log(socket.id);
