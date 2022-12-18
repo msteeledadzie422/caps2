@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3002;
 const Queue = require('./lib/queue');
 
 const server = new Server(PORT);
-console.log('listening on pot', PORT);
+console.log('listening on port', PORT);
 
 const caps = server.of('/caps');
 const messageQueue = new Queue();
