@@ -31,7 +31,7 @@ setInterval(() => {
   acme.publish('PICKUP', payload);
 }, 7000);
 
-acme.subscribe('IN-TRANSIT', (payload) => {
+flowers.subscribe('IN-TRANSIT', (payload) => {
   console.log(`Confirming pickup of order ${payload.orderId}, en route`);
 })
 
