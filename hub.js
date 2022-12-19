@@ -26,10 +26,10 @@ caps.on('connection', (socket) => {
   });
 
   socket.on('PICKUP', (payload) => {
-    console.log('Serverif PICKUP event', payload);
-    let currentQueue = messageQueue.read(payload.queueId);
+    console.log('PICKUP event', payload);
+    let currentQueue = messageQueue.read(payload.orderId);
     if (!currentQueue) {
-      let queueKey = messageQueue.store(payload.queueId, new Queue());
+      let queueKey = messageQueue.store(payload.orderId, new Queue());
       currentQueue = messageQueue.read(queueKey);
     }
     currentQueue.store(payload.messageId, payload);
@@ -41,9 +41,9 @@ caps.on('connection', (socket) => {
   });
 
   socket.on('DELIVERED', (payload) => {
-    let currentQueue = messageQueue.read(payload.queueId);
+    let currentQueue = messageQueue.read(payload.orderId);
     if (!currentQueue){
-      let queueKey = messageQueue.store(payload.queueId, new Queue());
+      let queueKey = messageQueue.store(payload.orderId, new Queue());
       currentQueue = messageQueue.read(queueKey);
     }
     currentQueue.store(payload.messageId, payload);
@@ -51,8 +51,8 @@ caps.on('connection', (socket) => {
   });
 
   socket.on('RECEIVED', (payload) => {
-    console.log('Server RECEIVED event', payload);
-    let currentQueue = messageQueue.read(payload.queueId);
+    console.log('RECEIVED event', payload);
+    let currentQueue = messageQueue.read(payload.id);
     if(!currentQueue){
       throw new Error('no queue created');
     }
