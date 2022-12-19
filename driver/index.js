@@ -9,9 +9,9 @@ const driver = new MessageClient('driver');
 driver.publish('GET_ALL',  { queueId: 'orderId'});
 
 driver.subscribe('PICKUP', payload => {
-  console.log('Order picked up', payload.orderId);
+  console.log('Order was successfully picked up', payload.orderId);
   driver.publish('IN-TRANSIT', payload)
-  console.log('Order delivered', payload.orderId);
+  console.log('Order was successfully delivered', payload.orderId);
   driver.publish('DELIVERED', payload);
 });
 
