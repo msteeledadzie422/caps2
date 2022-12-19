@@ -11,11 +11,11 @@ const acme = new MessageClient('Acme Widgets');
 const flowers = new MessageClient('1-800-Flowers');
 
 acme.subscribe('IN-TRANSIT', (payload) => {
-  console.log(`Confirming pickup of order: ${payload.orderId}, en route`);
+  console.log(`Driver has picked up order ${payload.orderId} and is en route`);
 })
 
 acme.subscribe('DELIVERED', payload => {
-  console.log('Thank you for delivering package: ', payload.orderId);
+  console.log('Thank you for delivering package', payload.orderId);
   acme.publish('RECEIVED', payload);
 });
 
@@ -32,11 +32,11 @@ setInterval(() => {
 }, 7000);
 
 flowers.subscribe('IN-TRANSIT', (payload) => {
-  console.log(`Confirming pickup of order ${payload.orderId}, en route`);
+  console.log(`Driver has picked up order ${payload.orderId} and is en route`);
 })
 
 flowers.subscribe('DELIVERED', payload => {
-  console.log('Thank you for delivering package: ', payload.orderId);
+  console.log('Thank you for delivering package', payload.orderId);
   flowers.publish('RECEIVED', payload);
 })
 
